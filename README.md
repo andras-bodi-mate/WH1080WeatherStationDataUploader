@@ -6,6 +6,8 @@ On Linux: Just start the run.sh bash script inside the scripts directory.
 
 On Windows: Just start the run.bat file located in  the scripts directory.
 
+The program then will ask for the username and password of the időkép account. After that, it will start uploading the weather data every minute.
+
 ## Deleting saved weather data
 NOTE: This will remove ALL weather data that was saved. This can't be undone.
 
