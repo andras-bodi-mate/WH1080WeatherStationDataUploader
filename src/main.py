@@ -1,5 +1,7 @@
 import sys
 
+import pwinput
+
 from device import Device
 from reportSaver import ReportSaver
 from reportUploader import ReportUploader
@@ -14,9 +16,10 @@ def main():
                 cleaner = Cleaner()
                 cleaner.clean()
     else:
+        username = input("időkép username: ")
+        password = pwinput.pwinput("időkép password: ")
         reportSaver = ReportSaver(Core.getPath("out"))
-        reportUploader = ReportUploader("<username>", "<password>")
-
+        reportUploader = ReportUploader(username, password)
         try:
             while True:
                 try:
