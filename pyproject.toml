@@ -1,0 +1,12 @@
+[project]
+name = "wh1080weatherstationdatauploader"
+version = "0.1.0"
+description = "Retrieves weather data from the WH1080 Weather Station's indoor unit and sends it to the idpkép.hu servers"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "hid>=1.0.8",
+    "requests>=2.32.5",
+    "strip-ansi>=0.1.1",
+    "sty>=1.0.6",
+]
