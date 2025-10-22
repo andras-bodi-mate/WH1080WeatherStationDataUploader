@@ -183,7 +183,7 @@ class Device:
             outdoorDewPoint,
             windChill,
             absoluteAirPressure,
-            totalRain
+            rainDiff
         )
 
         Logger.logInfo(" ".join([
@@ -197,8 +197,8 @@ class Device:
             format("wind speed: %2.1f," %windSpeed),
             format("gust speed: %2.1f," %gustSpeed),
             format("wind direction: %s," %Device.windDirections[windDirection]),
-            format("rain diff: %2.1f," %rainDiff),
-            format("total rain: %3.1f," %totalRain),
+            format("rain since last update: %2.1f," %rainDiff),
+            format("total rain since weather station reset: %3.1f," %totalRain),
             format("absolute pressure: %4.1f," %absoluteAirPressure)
         ]))
 
