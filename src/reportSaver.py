@@ -12,14 +12,14 @@ class ReportSaver:
     def save(self, report: Report):
         Logger.logInfo("Saving report...")
 
-        path = (self.directory / report.date.date().isoformat()).with_suffix(".csv")
+        path = (self.directory / report.datetime.date().isoformat()).with_suffix(".csv")
         if not path.exists():
             path.touch()
             with open(path, "w", encoding = "utf-8", newline = '') as file:
                 writer = csv.writer(file)
                 writer.writerow([
                     "id",
-                    "date",
+                    "datetime",
                     "indoorTemperature",
                     "indoorHumidity",
                     "outdoorTemperature",
@@ -27,17 +27,18 @@ class ReportSaver:
                     "windSpeed",
                     "gustSpeed",
                     "windDirection",
-                    "dewPoint",
+                    "outdoorDewPoint",
                     "windChill",
-                    "relativeAirPressure",
-                    "rain"
+                    "seaLevelAirPressure",
+                    "totalRain",
+                    "rainSinceLastUpdate"
                 ])
 
         with open(path, "a", encoding = "utf-8", newline = '') as file:
             writer = csv.writer(file)
             writer.writerow([
                 report.id,
-                report.date,
+                report.datetime,
                 report.indoorTemperature,
                 report.indoorHumidity,
                 report.outdoorTemperature,
@@ -45,10 +46,11 @@ class ReportSaver:
                 report.windSpeed,
                 report.gustSpeed,
                 report.windDirection,
-                report.dewPoint,
+                report.outdoorDewPoint,
                 report.windChill,
-                report.relativeAirPressure,
-                report.rain
+                report.seaLevelAirPressure,
+                report.totalRain,
+                report.rainSinceLastUpdate
             ])
         
         Logger.logInfo("Successfully saved report.")

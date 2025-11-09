@@ -1,6 +1,6 @@
 try
 {
-    cd ../
+    Set-Location ../
     uv run python src/main.py clean
     pause
 }

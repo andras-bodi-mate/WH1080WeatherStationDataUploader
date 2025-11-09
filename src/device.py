@@ -13,7 +13,9 @@ with os.add_dll_directory(Core.getPath("lib")) as _:
 class Device:
     windDirections = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
     maxRainJump = 10
+    altitude = 240
 
+    @staticmethod
     def getDewPoint(temperature: float, humidity: float):
         """
         Using the supplied temperature and humidity to calculate the dew point
@@ -22,6 +24,7 @@ class Device:
         gamma = (17.271 * temperature) / (237.7 + temperature) + math.log(humidity)
         return (237.7 * gamma) / (17.271 - gamma)
 
+    @staticmethod
     def getWindChill(temperature: float, wind: float):
         """
         Using the supplied temperature and wind speed to calculate the wind chill
@@ -45,6 +48,10 @@ class Device:
             return windChill
         else:
             return temperature
+
+    @staticmethod 
+    def getSeaLevelAirPressure(airPressure, temperature):
+        return airPressure * math.exp((0.0289644 * 9.8069 * Device.altitude) / (8.31446261815324 * (temperature + 273.15)))
 
     def __init__(self, vendorId = 0x1941, productId = 0x8021):
         self.vendorId = vendorId
@@ -136,24 +143,22 @@ class Device:
 
         # Bytes 8 and 9 when combined create an unsigned short int
         # that we multiply by 0.1 to find the absolute pressure
-        absoluteAirPressure = struct.unpack("H", currentBlock[7:9])[0]*0.1
+        relativeAirPressure = struct.unpack("H", currentBlock[7:9])[0]*0.1
+        seaLevelAirPressure = Device.getSeaLevelAirPressure(relativeAirPressure, outdoorTemperature)
         
         wind = currentBlock[9]
         gust = currentBlock[10]
         windExtra = currentBlock[11]
         windDirection = currentBlock[12]
+        windDirectionDegrees = windDirection * 22.5
         
         # Bytes 14 and 15  when combined create an unsigned short int
         # that we multiply by 0.3 to find the total rain
-        # I"m not confident that this is correct. Neither abs_pressure nor
-        # total_rain are returning sane values. In fact total_rain has
-        # stayed static despite rainfall
-        # Looks like I fixed it. They used fixed_block instead of current_block
         totalRain = struct.unpack("H", currentBlock[13:15])[0]*0.3
 
         # Calculate wind speeds
-        windSpeed = (wind + ((windExtra & 0x0F) << 8)) * 0.38  # Was 0.1
-        gustSpeed = (gust + ((windExtra & 0xF0) << 4)) * 0.38  # Was 0.1
+        windSpeed = (wind + ((windExtra & 0x0F) << 8)) * 0.38
+        gustSpeed = (gust + ((windExtra & 0xF0) << 4)) * 0.38
 
         outdoorDewPoint = Device.getDewPoint(outdoorTemperature, outdoorHumidity)
         windChill = Device.getWindChill(outdoorTemperature, windSpeed)
@@ -162,9 +167,9 @@ class Device:
         if self.previousRain == 0:
             self.previousRain = totalRain
 
-        rainDiff = totalRain - self.previousRain # Calculate the amount of rain that has fallen since last update
-        if rainDiff > Device.maxRainJump:  # Filter rainfall spikes
-            rainDiff = 0
+        rainSinceLastUpdate = totalRain - self.previousRain # Calculate the amount of rain that has fallen since last update
+        if rainSinceLastUpdate > Device.maxRainJump:  # Filter rainfall spikes
+            rainSinceLastUpdate = 0
             totalRain = self.previousRain
 
         self.previousRain = totalRain
@@ -179,11 +184,12 @@ class Device:
             outdoorHumidity,
             windSpeed,
             gustSpeed,
-            windDirection,
+            windDirectionDegrees,
             outdoorDewPoint,
             windChill,
-            absoluteAirPressure,
-            rainDiff
+            seaLevelAirPressure,
+            totalRain,
+            rainSinceLastUpdate
         )
 
         Logger.logInfo(" ".join([
@@ -197,9 +203,9 @@ class Device:
             format("wind speed: %2.1f," %windSpeed),
             format("gust speed: %2.1f," %gustSpeed),
             format("wind direction: %s," %Device.windDirections[windDirection]),
-            format("rain since last update: %2.1f," %rainDiff),
+            format("rain since last update: %2.1f," %rainSinceLastUpdate),
             format("total rain since weather station reset: %3.1f," %totalRain),
-            format("absolute pressure: %4.1f," %absoluteAirPressure)
+            format("air pressure at sea level: %4.1f," %seaLevelAirPressure)
         ]))
 
         return report

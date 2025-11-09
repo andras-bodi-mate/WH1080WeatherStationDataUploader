@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+import contextlib
 import requests
 from http.client import responses
 
@@ -19,20 +19,41 @@ class ReportUploader:
             params = {
                 "user": self.username,
                 "pass": self.password,
-                "ev": report.date.year,
-                "ho": report.date.month,
-                "nap": report.date.day,
-                "ora": report.date.hour,
-                "perc": report.date.minute,
-                "mp": report.date.second,
+                "ev": report.datetime.year,
+                "ho": report.datetime.month,
+                "nap": report.datetime.day,
+                "ora": report.datetime.hour,
+                "perc": report.datetime.minute,
+                "mp": report.datetime.second,
                 "hom": report.outdoorTemperature,
                 "rh": report.outdoorHumidity,
-                "p": report.relativeAirPressure,
+                "p": report.seaLevelAirPressure,
                 "szelirany": report.windDirection,
                 "szelero": report.windSpeed,
-                "csap": report.rain
+                "csap": report.rainSinceLastUpdate
             }
         )
+
+        with contextlib.suppress(requests.RequestException):
+            requests.post(
+                "http://127.0.0.1:57320",
+                data = {
+                    "id": report.id,
+                    "year": int(report.datetime.timestamp()),
+                    "indoorTemperature": report.indoorTemperature,
+                    "indoorHumidity": report.indoorHumidity,
+                    "outdoorTemperature": report.outdoorTemperature,
+                    "outdoorHumidity": report.outdoorHumidity,
+                    "windSpeed": report.windSpeed,
+                    "gustSpeed": report.gustSpeed,
+                    "windDirection": report.windDirection,
+                    "outdoorDewPoint": report.outdoorDewPoint,
+                    "windChill": report.windChill,
+                    "seaLevelAirPressure": report.seaLevelAirPressure,
+                    "totalRain": report.totalRain,
+                    "rainSinceLastUpdate": report.rainSinceLastUpdate
+                }
+            )
 
         if response.status_code != requests.status_codes.codes.OK:
             Logger.logError(f"Couldn't send report. Reason: \"{response.reason}\"  {response.status_code} {responses[response.status_code].upper()}")
