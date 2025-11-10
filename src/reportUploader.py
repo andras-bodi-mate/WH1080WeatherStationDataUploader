@@ -30,6 +30,7 @@ class ReportUploader:
                 "p": report.seaLevelAirPressure,
                 "szelirany": report.windDirection,
                 "szelero": report.windSpeed,
+                "szellokes": report.gustSpeed,
                 "csap": report.rainSinceLastUpdate
             }
         )
