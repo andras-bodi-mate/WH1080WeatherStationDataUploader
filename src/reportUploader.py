@@ -35,12 +35,12 @@ class ReportUploader:
             }
         )
 
-        with contextlib.suppress(requests.RequestException):
+        with contextlib.suppress(None):
             requests.post(
                 "http://127.0.0.1:57320",
-                data = {
+                json = {
                     "id": report.id,
-                    "year": int(report.datetime.timestamp()),
+                    "timestamp": int(report.datetime.timestamp()),
                     "indoorTemperature": report.indoorTemperature,
                     "indoorHumidity": report.indoorHumidity,
                     "outdoorTemperature": report.outdoorTemperature,
