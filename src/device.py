@@ -56,6 +56,7 @@ class Device:
     def __init__(self, vendorId = 0x1941, productId = 0x8021):
         self.vendorId = vendorId
         self.productId = productId
+        self.previousReport = None
         self.previousRain = 0
 
     def __enter__(self):

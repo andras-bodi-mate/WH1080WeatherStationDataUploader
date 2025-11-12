@@ -20,18 +20,23 @@ def main():
         password = pwinput.pwinput("időkép password: ")
         reportSaver = ReportSaver(Core.getPath("out"))
         reportUploader = ReportUploader(username, password)
+        previousReport = None
         try:
             while True:
                 try:
                     with Device() as device:
                         while True:
                             report = device.getReport()
-                            reportSaver.save(report)
-                            reportUploader.upload(report)
-                            Core.sleep(60, "Getting next report in: {0} seconds")
+                            if previousReport and not report.isValid(previousReport):
+                                Logger.logWarning("Report is not valid, ignoring.")
+                            else:
+                                reportSaver.save(report)
+                                reportUploader.upload(report)
+                                previousReport = report
+                            Core.sleep(60, "Getting next report in: {0} seconds...")
                 except Exception as error:
                     Logger.logError(error)
-                    Core.sleep(5, "Retrying in: {0} seconds")
+                    Core.sleep(5, "Retrying in: {0} seconds...")
         except KeyboardInterrupt:
             Logger.logInfo("Exiting...")
 

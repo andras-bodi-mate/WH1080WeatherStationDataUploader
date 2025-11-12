@@ -49,7 +49,7 @@ class ReportSaver:
                 report.outdoorDewPoint,
                 report.windChill,
                 report.seaLevelAirPressure,
-                report.totalRain,
+                report.allTimeRain,
                 report.rainSinceLastUpdate
             ])
         

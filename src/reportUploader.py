@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import contextlib
 import requests
+from requests.adapters import HTTPAdapter, Retry
 from http.client import responses
 
 from report import Report
@@ -31,11 +32,12 @@ class ReportUploader:
                 "szelirany": report.windDirection,
                 "szelero": report.windSpeed,
                 "szellokes": report.gustSpeed,
-                "csap": report.rainSinceLastUpdate
+                "csap": Report.getRainInLast24Hours(),
+                "csap1h": Report.getRainInLastHour()
             }
         )
 
-        with contextlib.suppress(None):
+        with contextlib.suppress(requests.RequestException):
             requests.post(
                 "http://127.0.0.1:57320",
                 json = {
@@ -51,7 +53,7 @@ class ReportUploader:
                     "outdoorDewPoint": report.outdoorDewPoint,
                     "windChill": report.windChill,
                     "seaLevelAirPressure": report.seaLevelAirPressure,
-                    "totalRain": report.totalRain,
+                    "totalRain": report.allTimeRain,
                     "rainSinceLastUpdate": report.rainSinceLastUpdate
                 }
             )
