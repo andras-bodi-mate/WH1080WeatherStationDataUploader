@@ -7,6 +7,7 @@ from reportSaver import ReportSaver
 from reportUploader import ReportUploader
 from logger import Logger
 from cleaner import Cleaner
+from exceptions import DeviceConnectionError, InvalidReportError
 from core import Core
 
 def main():
@@ -28,7 +29,7 @@ def main():
                         while True:
                             report = device.getReport()
                             if previousReport and not report.isValid(previousReport):
-                                Logger.logWarning("Report is not valid, ignoring.")
+                                raise InvalidReportError("Report is not valid.")
                             else:
                                 reportSaver.save(report)
                                 reportUploader.upload(report)

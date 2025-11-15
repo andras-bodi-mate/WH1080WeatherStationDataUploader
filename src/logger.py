@@ -1,7 +1,7 @@
 import sty
 from inspect import stack
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 from strip_ansi import strip_ansi
 
@@ -27,12 +27,12 @@ class Logger:
 
     @staticmethod
     def logToFile(message: str, level: str):
-        file = (Logger.loggingDirectory / datetime.now().isoformat()).with_suffix(".log")
+        file = (Logger.loggingDirectory / date.today().isoformat()).with_suffix(".log")
         file.touch()
 
-        currentDatetime = datetime.now()
+        currentDatetime = date.today()
         for file in Logger.loggingDirectory.iterdir():
-            if currentDatetime - datetime.fromisoformat(file.stem) > timedelta(days = Logger.daysToKeepLogsAroundFor):
+            if file.suffix == ".log" and currentDatetime - date.fromisoformat(file.stem) > timedelta(days = Logger.daysToKeepLogsAroundFor):
                 file.unlink()
 
         with open(file, "a") as file:

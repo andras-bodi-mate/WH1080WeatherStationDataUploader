@@ -6,6 +6,7 @@ import datetime
 from core import Core
 from report import Report
 from logger import Logger
+from exceptions import DeviceConnectionError
 
 with os.add_dll_directory(Core.getPath("lib")) as _:
     import hid
@@ -65,7 +66,7 @@ class Device:
             Logger.logInfo("Successfully connected to device.")
         except hid.HIDException as error:
             if error.args[0] == "unable to open device":
-                raise ConnectionError("Couldn't connect to device.")
+                raise DeviceConnectionError("Couldn't connect to device.")
             else:
                 raise error
         return self
