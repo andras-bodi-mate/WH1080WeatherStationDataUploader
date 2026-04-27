@@ -1,5 +1,5 @@
-class InvalidReportError(ValueError):
+class InvalidReportError(Exception):
     pass
 
-class DeviceConnectionError(ConnectionError):
+class DeviceConnectionError(Exception):
     pass

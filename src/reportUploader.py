@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 import contextlib
 import requests
-from requests.adapters import HTTPAdapter, Retry
 from http.client import responses
+import logging
 
 from report import Report
-from logger import Logger
 
 @dataclass
 class ReportUploader:
@@ -13,7 +12,7 @@ class ReportUploader:
     password: str
 
     def upload(self, report: Report):
-        Logger.logInfo("Sending report...")
+        logging.info("Sending report...")
 
         response = requests.get(
             "https://idokep.hu/sendws.php",
@@ -59,6 +58,7 @@ class ReportUploader:
             )
 
         if response.status_code != requests.status_codes.codes.OK:
-            Logger.logError(f"Couldn't send report. Reason: \"{response.reason}\"  {response.status_code} {responses[response.status_code].upper()}")
+            logging.error(f"Couldn't send report. Reason: \
+                          \"{response.reason}\"  {response.status_code} {responses[response.status_code].upper()}")
         else:
-            Logger.logInfo("Successfully sent report.")
+            logging.info("Successfully sent report.")

@@ -1,3 +1,6 @@
+import logging
+
+from loggingConfigurer import LoggingConfigurer
 from core import Core
 
 class Cleaner:
@@ -11,6 +14,7 @@ class Cleaner:
                     file.unlink()
                     didDeleteAnyWeatherData = True
 
+            LoggingConfigurer.shutdownFileHandlers()
             didDeleteAnyLogFile = False
             for file in Core.getPath("log").iterdir():
                 if file.suffix == ".log":
@@ -18,13 +22,13 @@ class Cleaner:
                     didDeleteAnyLogFile = True
 
             if didDeleteAnyWeatherData:
-                print("Successfully cleaned weather data.")
+                logging.info("Successfully cleaned weather data.")
             else:
-                print("No weather data was found that could be deleted.")
+                logging.info("No weather data was found that could be deleted.")
 
             if didDeleteAnyLogFile:
-                print("Successfully cleaned error logs.")
+                logging.info("Successfully cleaned logs.")
             else:
-                print("No log was found that could be deleted.")
+                logging.info("No log was found that could be deleted.")
         else:
             print("Aborted.")

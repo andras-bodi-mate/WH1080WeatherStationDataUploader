@@ -1,7 +1,7 @@
 try
 {
     Set-Location ../
-    uv run python src/main.py
+    uv run python src/main.py run
     pause
 }
 catch

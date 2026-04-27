@@ -1,8 +1,8 @@
 from pathlib import Path
 import csv
+import logging
 
 from report import Report
-from logger import Logger
 
 class ReportSaver:
     def __init__(self, directory: Path):
@@ -10,7 +10,7 @@ class ReportSaver:
         self.directory.mkdir(parents = True, exist_ok = True)
 
     def save(self, report: Report):
-        Logger.logInfo("Saving report...")
+        logging.info("Saving report...")
 
         path = (self.directory / report.datetime.date().isoformat()).with_suffix(".csv")
         if not path.exists():
@@ -53,4 +53,4 @@ class ReportSaver:
                 report.rainSinceLastUpdate
             ])
         
-        Logger.logInfo("Successfully saved report.")
+        logging.info("Successfully saved report.")

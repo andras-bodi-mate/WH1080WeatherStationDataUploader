@@ -1,9 +1,9 @@
 import argparse
+import logging
 
 from device import Device
 from reportSaver import ReportSaver
 from reportUploader import ReportUploader
-from logger import Logger
 from exceptions import DeviceConnectionError, InvalidReportError
 from core import Core
 
@@ -17,7 +17,7 @@ class App:
     def collectDataAndSend(self, device: Device):
         report = device.getReport()
         if self.args.verbose:
-            Logger.logDebug(report)
+            logging.debug(report)
 
         if previousReport and not report.isValid(previousReport):
             raise InvalidReportError("Report is not valid.")
@@ -35,7 +35,7 @@ class App:
                             self.collectDataAndSend(device)
                             Core.sleep(60, "Getting next report in: {0} seconds...")
                 except Exception as error:
-                    Logger.logError(error)
+                    logging.error(error)
                     Core.sleep(5, "Retrying in: {0} seconds...")
         except KeyboardInterrupt:
-            Logger.logInfo("Exiting...")
+            logging.info("Exiting...")

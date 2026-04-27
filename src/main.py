@@ -2,8 +2,8 @@ import argparse
 
 import pwinput
 
-from logger import Logger
 from cleaner import Cleaner
+from loggingConfigurer import LoggingConfigurer
 from app import App
 
 def main():
@@ -24,9 +24,9 @@ def main():
 
     args = parser.parse_args()
 
-    Logger.configure(
-        quiet = args.quiet,
-        verbose = args.verbose
+    LoggingConfigurer.configureLogging(
+        quiet=args.quiet,
+        verbose=args.verbose
     )
 
     if args.command == "clean":

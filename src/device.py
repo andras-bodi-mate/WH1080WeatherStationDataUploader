@@ -2,10 +2,10 @@ import os
 import struct
 import math
 import datetime
+import logging
 
 from core import Core
 from report import Report
-from logger import Logger
 from exceptions import DeviceConnectionError
 
 with os.add_dll_directory(Core.getPath("lib")) as _:
@@ -63,7 +63,7 @@ class Device:
     def __enter__(self):
         try:
             self.device = hid.Device(self.vendorId, self.productId)
-            Logger.logInfo("Successfully connected to device.")
+            logging.info("Successfully connected to device.")
         except hid.HIDException as error:
             if error.args[0] == "unable to open device":
                 raise DeviceConnectionError("Couldn't connect to device.")
@@ -194,7 +194,7 @@ class Device:
             rainSinceLastUpdate
         )
 
-        Logger.logInfo(" ".join([
+        logging.debug(" ".join([
             format(str(date)),
             format("indoor humidity: %i," %indoorHumidity),
             format("outdoor humidity: %i," %outdoorHumidity),
