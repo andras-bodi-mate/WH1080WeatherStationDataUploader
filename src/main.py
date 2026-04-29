@@ -1,5 +1,6 @@
 import argparse
 import tomllib
+import logging
 
 import pwinput
 
@@ -41,10 +42,12 @@ def main():
         logBackupCount=configToml["logging"]["backup_count"]
     )
 
-    LoggingConfigurer.configureLogging(
+    LoggingConfigurer(config).configureLogging(
         quiet=args.quiet,
         verbose=args.verbose
     )
+
+    logging.debug(f"The program will use the following config options:\n{config}")
 
     if args.command == "clean":
         cleaner = Cleaner()

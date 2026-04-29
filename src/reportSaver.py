@@ -9,7 +9,7 @@ class ReportSaver:
     def __init__(self, config: Config):
         self.directory = config.outputDir
         self.directory.mkdir(parents = True, exist_ok = True)
-        logging.info(f"Reports will be saved in: {self.directory.as_posix()}")
+        logging.debug(f"Reports will be saved in: {self.directory.as_posix()}")
 
     def save(self, report: Report):
         logging.info("Saving report...")

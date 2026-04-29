@@ -4,6 +4,7 @@ from pathlib import Path
 import sty
 
 from core import Core
+from config import Config
 
 class ColoredFormatter(logging.Formatter):
     levelColors = {
@@ -36,15 +37,23 @@ class ColoredFormatter(logging.Formatter):
 
 
 class LoggingConfigurer:
-    logPath = Core.getPath("log")
-
     @staticmethod
-    def logFileNamer(defaultName):
+    def shutdownFileHandlers():
+        logger = logging.getLogger()
+
+        for handler in logger.handlers[:]:
+            if isinstance(handler, logging.FileHandler):
+                handler.close()
+                logger.removeHandler(handler)
+
+    def __init__(self, config: Config):
+        self.logDir = config.logDir
+
+    def logFileNamer(self, defaultName):
         datePart = Path(defaultName).stem.split(".")[-1]
-        return LoggingConfigurer.logPath / Path(datePart).with_suffix(".log")
+        return self.logDir / Path(datePart).with_suffix(".log")
 
-    @staticmethod
-    def configureLogging(quiet=False, verbose=False):
+    def configureLogging(self, quiet=False, verbose=False):
         level = logging.INFO
         if quiet:
             level = logging.ERROR
@@ -60,7 +69,7 @@ class LoggingConfigurer:
         )
 
         fileHandler = TimedRotatingFileHandler(
-            LoggingConfigurer.logPath / "app.log",
+            self.logDir / "app.log",
             encoding="UTF-8",
             when="midnight",
             backupCount=5
@@ -76,12 +85,5 @@ class LoggingConfigurer:
 
         logging.basicConfig(level=level, handlers=[console, fileHandler])
 
-    @staticmethod
-    def shutdownFileHandlers():
-        logger = logging.getLogger()
-
-        for handler in logger.handlers[:]:
-            if isinstance(handler, logging.FileHandler):
-                handler.close()
-                logger.removeHandler(handler)
+        logging.debug(f"Logs will be saved in {self.logDir}")
     
