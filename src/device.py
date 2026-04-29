@@ -7,14 +7,19 @@ import logging
 from core import Core
 from report import Report
 from exceptions import DeviceConnectionError
+from config import Config
 
 with os.add_dll_directory(Core.getPath("lib")) as _:
     import hid
 
 class Device:
     windDirections = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+
     maxRainJump = 10
+    """Maximum difference between two consecutive total rain readings in millimeters"""
+
     altitude = 240
+    """Device altitude in meters above sea level"""
 
     @staticmethod
     def getDewPoint(temperature: float, humidity: float):
@@ -52,11 +57,27 @@ class Device:
 
     @staticmethod 
     def getSeaLevelAirPressure(airPressure, temperature):
+        """Calculate sea level pressure from relative pressure in kPa and temperature in celsius using
+
+        P₀ = P * exp((M * g * h) / (R * T))
+
+        where:
+            - P: Reference atmospheric pressure at altitude h
+            - P₀: Atmospheric pressure at sea level.
+            - M: Molar mass of dry air (0.0289644 kg/mol).
+            - g: Acceleration due to gravity (9.80665 m/s²).
+            - h: Altitude (height above sea level) in meters.
+            - R: Ideal gas constant (8.31446261815324 J/(mol·K)).
+            - T: Absolute temperature in Kelvin
+
+        Air pressure is in kPa.
+        """
         return airPressure * math.exp((0.0289644 * 9.8069 * Device.altitude) / (8.31446261815324 * (temperature + 273.15)))
 
-    def __init__(self, vendorId = 0x1941, productId = 0x8021):
+    def __init__(self, config: Config, vendorId = 0x1941, productId = 0x8021):
         self.vendorId = vendorId
         self.productId = productId
+        self.timeout = config.deviceTimeout
         self.previousReport = None
         self.previousRain = 0
 
@@ -74,9 +95,9 @@ class Device:
     def __exit__(self, exc_type, exc_value, traceback):
         self.device.close()
 
-    def readBlock(self, offset):
+    def readBlock(self, offset: int):
         """
-        Read a block of data from the specified device, starting at the given offset in bytes
+        Read a block of data from the device, starting at the given offset in bytes
         """
 
         leastSignificantBit = offset & 0xFF
@@ -95,13 +116,11 @@ class Device:
             32
         )
 
-        timeout = 1000  # Milliseconds
-
         self.device.write(bytes([0x01]) + tbuf)
 
         block = bytearray()
         while len(block) < 32:
-            chunk = self.device.read(8, timeout)
+            chunk = self.device.read(8, self.timeout)
             if not chunk:
                 raise IOError("Timed out while reading from weather station")
             block.extend(chunk)
@@ -156,7 +175,7 @@ class Device:
         
         # Bytes 14 and 15  when combined create an unsigned short int
         # that we multiply by 0.3 to find the total rain
-        totalRain = struct.unpack("H", currentBlock[13:15])[0]*0.3
+        allTimeRain = struct.unpack("H", currentBlock[13:15])[0] * 0.3
 
         # Calculate wind speeds
         windSpeed = (wind + ((windExtra & 0x0F) << 8)) * 0.38
@@ -167,31 +186,31 @@ class Device:
 
         # In the first run there is no previous value, so we set it to the total amount of rain
         if self.previousRain == 0:
-            self.previousRain = totalRain
+            self.previousRain = allTimeRain
 
-        rainSinceLastUpdate = totalRain - self.previousRain # Calculate the amount of rain that has fallen since last update
+        rainSinceLastUpdate = allTimeRain - self.previousRain # Calculate the amount of rain that has fallen since last update
         if rainSinceLastUpdate > Device.maxRainJump:  # Filter rainfall spikes
             rainSinceLastUpdate = 0
-            totalRain = self.previousRain
+            allTimeRain = self.previousRain
 
-        self.previousRain = totalRain
+        self.previousRain = allTimeRain
 
         date = datetime.datetime.now()
 
         report = Report(
-            date,
-            indoorTemperature,
-            indoorHumidity,
-            outdoorTemperature,
-            outdoorHumidity,
-            windSpeed,
-            gustSpeed,
-            windDirectionDegrees,
-            outdoorDewPoint,
-            windChill,
-            seaLevelAirPressure,
-            totalRain,
-            rainSinceLastUpdate
+            datetime=date,
+            indoorTemperature=indoorTemperature,
+            indoorHumidity=indoorHumidity,
+            outdoorTemperature=outdoorTemperature,
+            outdoorHumidity=outdoorHumidity,
+            windSpeed=windSpeed,
+            gustSpeed=gustSpeed,
+            windDirectionDegrees=windDirectionDegrees,
+            outdoorDewPoint=outdoorDewPoint,
+            windChill=windChill,
+            seaLevelAirPressure=seaLevelAirPressure,
+            allTimeRain=allTimeRain,
+            rainSinceLastUpdate=rainSinceLastUpdate
         )
 
         logging.debug(" ".join([
@@ -206,7 +225,7 @@ class Device:
             format("gust speed: %2.1f," %gustSpeed),
             format("wind direction: %s," %Device.windDirections[windDirection]),
             format("rain since last update: %2.1f," %rainSinceLastUpdate),
-            format("total rain since weather station reset: %3.1f," %totalRain),
+            format("total rain since weather station reset: %3.1f," %allTimeRain),
             format("air pressure at sea level: %4.1f," %seaLevelAirPressure)
         ]))
 

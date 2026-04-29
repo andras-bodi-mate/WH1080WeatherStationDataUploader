@@ -1,0 +1,17 @@
+[station]
+altitude = 240
+
+[device]
+timeout = 5
+connection_retry_delay = 5
+
+[upload]
+frequency = 60
+local_port = 57320
+
+[paths]
+log_dir = "log"
+output_dir = "out"
+
+[logging]
+backup_count = 5

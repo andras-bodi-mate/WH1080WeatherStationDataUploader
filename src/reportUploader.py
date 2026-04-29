@@ -5,11 +5,14 @@ from http.client import responses
 import logging
 
 from report import Report
+from config import Config
 
-@dataclass
 class ReportUploader:
-    username: str
-    password: str
+    def __init__(self, config: Config, username: str, password: str):
+        self.frequency = config.uploadFrequency
+        self.localPort = config.uploadLocalPort
+        self.username = username
+        self.password = password
 
     def upload(self, report: Report):
         logging.info("Sending report...")
@@ -38,7 +41,7 @@ class ReportUploader:
 
         with contextlib.suppress(requests.RequestException):
             requests.post(
-                "http://127.0.0.1:57320",
+                f"http://127.0.0.1:{self.localPort}",
                 json = {
                     "id": report.id,
                     "timestamp": int(report.datetime.timestamp()),
@@ -56,6 +59,7 @@ class ReportUploader:
                     "rainSinceLastUpdate": report.rainSinceLastUpdate
                 }
             )
+            logging.info("Successfully sent report to local port 12345.")
 
         if response.status_code != requests.status_codes.codes.OK:
             logging.error(f"Couldn't send report. Reason: \

@@ -62,7 +62,7 @@ class Report:
     """The wind chill factor in degrees celsius (it takes into account the effect of wind in cold environments feeling like as if it was colder)."""
 
     seaLevelAirPressure: float
-    """What the air pressure would be at sea level."""
+    """What the air pressure would be at sea level in kPa."""
 
     allTimeRain: float
     """The total amount of rain since the device was reset in millimeters."""

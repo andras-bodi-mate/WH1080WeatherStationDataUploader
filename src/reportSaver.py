@@ -1,13 +1,15 @@
-from pathlib import Path
 import csv
 import logging
+from pathlib import Path
 
 from report import Report
+from config import Config
 
 class ReportSaver:
-    def __init__(self, directory: Path):
-        self.directory = directory
+    def __init__(self, config: Config):
+        self.directory = config.outputDir
         self.directory.mkdir(parents = True, exist_ok = True)
+        logging.info(f"Reports will be saved in: {self.directory.as_posix()}")
 
     def save(self, report: Report):
         logging.info("Saving report...")

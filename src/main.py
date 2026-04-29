@@ -1,10 +1,13 @@
 import argparse
+import tomllib
 
 import pwinput
 
 from cleaner import Cleaner
 from loggingConfigurer import LoggingConfigurer
 from app import App
+from config import Config
+from core import Core
 
 def main():
     parser = argparse.ArgumentParser(
@@ -24,6 +27,20 @@ def main():
 
     args = parser.parse_args()
 
+    with open(Core.getPath("config.toml"), "rb") as configFile:
+        configToml = tomllib.load(configFile)
+
+    config = Config(
+        stationAltitude=configToml["station"]["altitude"],
+        deviceTimeout=configToml["device"]["timeout"],
+        deviceConnectionRetryDelay=configToml["device"]["connection_retry_delay"],
+        uploadFrequency=configToml["upload"]["frequency"],
+        uploadLocalPort=configToml["upload"]["local_port"],
+        logDir=Core.getPath(configToml["paths"]["log_dir"]),
+        outputDir=Core.getPath(configToml["paths"]["output_dir"]),
+        logBackupCount=configToml["logging"]["backup_count"]
+    )
+
     LoggingConfigurer.configureLogging(
         quiet=args.quiet,
         verbose=args.verbose
@@ -37,7 +54,7 @@ def main():
         username = args.username or input("időkép username: ")
         password = args.password or pwinput.pwinput("időkép password: ")
 
-        app = App(args, username, password)
+        app = App(args, config, username, password)
         app.start()
 
 main()
