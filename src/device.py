@@ -120,7 +120,7 @@ class Device:
 
         block = bytearray()
         while len(block) < 32:
-            chunk = self.device.read(8, self.timeout)
+            chunk = self.device.read(8, self.timeout * 1000)
             if not chunk:
                 raise IOError("Timed out while reading from weather station")
             block.extend(chunk)
@@ -205,7 +205,7 @@ class Device:
             outdoorHumidity=outdoorHumidity,
             windSpeed=windSpeed,
             gustSpeed=gustSpeed,
-            windDirectionDegrees=windDirectionDegrees,
+            windDirection=windDirectionDegrees,
             outdoorDewPoint=outdoorDewPoint,
             windChill=windChill,
             seaLevelAirPressure=seaLevelAirPressure,

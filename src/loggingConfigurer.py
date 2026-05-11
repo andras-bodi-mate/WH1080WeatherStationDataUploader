@@ -75,7 +75,7 @@ class LoggingConfigurer:
             backupCount=5
         )
         fileHandler.suffix = "%Y.%m.%d"
-        fileHandler.namer = LoggingConfigurer.logFileNamer
+        fileHandler.namer = self.logFileNamer
         fileHandler.setFormatter(
             logging.Formatter(
                 "[%(filename)s] (%(asctime)s) %(levelname)s: %(message)s",

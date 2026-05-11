@@ -24,12 +24,12 @@ class App:
         if self.args.verbose:
             logging.debug(report)
 
-        if previousReport and not report.isValid(previousReport):
+        if self.previousReport and not report.isValid(self.previousReport):
             raise InvalidReportError("Report is not valid.")
         else:
             self.reportSaver.save(report)
             self.reportUploader.upload(report)
-            previousReport = report
+            self.previousReport = report
 
     def start(self):
         try:
