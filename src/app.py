@@ -2,10 +2,8 @@ import argparse
 import logging
 
 from device import Device
-from reportSaver import ReportSaver
-from reportUploader import ReportUploader
-from exceptions import InvalidReportError
-from report import Report
+from readingUploader import ReadingUploader
+from databaseManager import DatabaseManager
 from config import Config
 from core import Core
 
@@ -15,21 +13,16 @@ class App:
         self.config = config
         self.uploadFrequency = config.uploadFrequency
         self.deviceConnectionRetryDelay = config.deviceConnectionRetryDelay
-        self.reportSaver = ReportSaver(config)
-        self.reportUploader = ReportUploader(config, username, password)
-        self.previousReport: Report = None
+        self.databaseManager = DatabaseManager(config.outputDir / "database.db")
+        self.readingUploader = ReadingUploader(config, username, password)
 
     def collectDataAndSend(self, device: Device):
-        report = device.getReport()
+        reading = device.getReading()
         if self.args.verbose:
-            logging.debug(report)
+            logging.debug(reading)
 
-        if self.previousReport and not report.isValid(self.previousReport):
-            raise InvalidReportError("Report is not valid.")
-        else:
-            self.reportSaver.save(report)
-            self.reportUploader.upload(report)
-            self.previousReport = report
+        self.databaseManager.save(reading)
+        self.readingUploader.upload(reading)
 
     def start(self):
         try:
@@ -38,7 +31,7 @@ class App:
                     with Device(self.config) as device:
                         while True:
                             self.collectDataAndSend(device)
-                            Core.sleep(self.uploadFrequency, "Getting next report in: {0} seconds...")
+                            Core.sleep(self.uploadFrequency, "Getting next reading in: {0} seconds...")
                 except Exception as error:
                     logging.error(error)
                     Core.sleep(self.deviceConnectionRetryDelay, "Retrying in: {0} seconds...")

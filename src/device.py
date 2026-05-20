@@ -5,7 +5,7 @@ import datetime
 import logging
 
 from core import Core
-from report import Report
+from weatherReading import WeatherReading
 from exceptions import DeviceConnectionError
 from config import Config
 
@@ -78,7 +78,7 @@ class Device:
         self.vendorId = vendorId
         self.productId = productId
         self.timeout = config.deviceTimeout
-        self.previousReport = None
+        self.previousReading = None
         self.previousRain = 0
 
     def __enter__(self):
@@ -104,7 +104,7 @@ class Device:
         mostSignificantBit = offset >> 8 & 0xFF
 
         # Construct a binary message
-        tbuf = struct.pack(
+        request = struct.pack(
             "BBBBBBBB",
             0xA1,
             mostSignificantBit,
@@ -116,7 +116,7 @@ class Device:
             32
         )
 
-        self.device.write(bytes([0x01]) + tbuf)
+        self.device.write(bytes([0x01]) + request)
 
         block = bytearray()
         while len(block) < 32:
@@ -130,7 +130,7 @@ class Device:
 
         return block
 
-    def getReport(self):
+    def getReading(self):
         fixedBlock = self.readBlock(0)
 
         # Check that we have good data
@@ -197,8 +197,8 @@ class Device:
 
         date = datetime.datetime.now()
 
-        report = Report(
-            datetime=date,
+        reading = WeatherReading(
+            timestamp=date,
             indoorTemperature=indoorTemperature,
             indoorHumidity=indoorHumidity,
             outdoorTemperature=outdoorTemperature,
@@ -229,4 +229,4 @@ class Device:
             format("air pressure at sea level: %4.1f," %seaLevelAirPressure)
         ]))
 
-        return report
+        return reading
