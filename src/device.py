@@ -3,13 +3,17 @@ import struct
 import math
 import datetime
 import logging
+import platform
 
 from core import Core
 from weatherReading import WeatherReading
 from exceptions import DeviceConnectionError
 from config import Config
 
-with os.add_dll_directory(Core.getPath("lib")) as _:
+if platform.system() == "Windows":
+    with os.add_dll_directory(Core.getPath("lib")) as _:
+        import hid
+else:
     import hid
 
 class Device:
