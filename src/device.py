@@ -3,13 +3,17 @@ import struct
 import math
 import datetime
 import logging
+import platform
 
 from core import Core
 from weatherReading import WeatherReading
 from exceptions import DeviceConnectionError
 from config import Config
 
-with os.add_dll_directory(Core.getPath("lib")) as _:
+if platform.system() == "Windows":
+    with os.add_dll_directory(Core.getPath("lib")) as _:
+        import hid
+else:
     import hid
 
 class Device:
@@ -144,20 +148,20 @@ class Device:
 
         # Indoor information
         indoorHumidity = currentBlock[1]
-        tlsb = currentBlock[2]
-        tmsb = currentBlock[3] & 0x7f
+        tempLeastSignificantByte = currentBlock[2]
+        tempMostSignificantByte = currentBlock[3] & 0x7f
         temperatureSign = currentBlock[3] >> 7
-        indoorTemperature = (tmsb * 256 + tlsb) * 0.1
+        indoorTemperature = (tempMostSignificantByte * 256 + tempLeastSignificantByte) * 0.1
         # Check if temperature is less than zero
         if temperatureSign:
             indoorTemperature *= -1
 
         # Outdoor information
         outdoorHumidity = currentBlock[4]
-        tlsb = currentBlock[5]
-        tmsb = currentBlock[6] & 0x7f
+        tempLeastSignificantByte = currentBlock[5]
+        tempMostSignificantByte = currentBlock[6] & 0x7f
         temperatureSign = currentBlock[6] >> 7
-        outdoorTemperature = (tmsb * 256 + tlsb) * 0.1
+        outdoorTemperature = (tempMostSignificantByte * 256 + tempLeastSignificantByte) * 0.1
         # Check if temperature is less than zero
         if temperatureSign:
             outdoorTemperature *= -1
