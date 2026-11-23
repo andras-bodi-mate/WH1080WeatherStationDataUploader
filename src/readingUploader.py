@@ -12,7 +12,7 @@ class ReadingUploader:
         self.username = username
         self.password = password
 
-    def upload(self, reading: WeatherReading):
+    def upload(self, reading: WeatherReading, rainInLastHour: float, rainInLast24Hours: float):
         logging.info("Sending reading...")
 
         response = requests.get(
@@ -32,8 +32,8 @@ class ReadingUploader:
                 "szelirany": reading.windDirection,
                 "szelero": reading.windSpeed,
                 "szellokes": reading.gustSpeed,
-                "csap": WeatherReading.getRainInLast24Hours(),
-                "csap1h": WeatherReading.getRainInLastHour()
+                "csap": rainInLast24Hours,
+                "csap1h": rainInLastHour
             }
         )
 

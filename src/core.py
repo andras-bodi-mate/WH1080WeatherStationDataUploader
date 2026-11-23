@@ -13,7 +13,7 @@ class Core:
             return Core.projectDir / PurePosixPath(path)
         
     @staticmethod
-    def sleep(seconds: float, message: str = None):
+    def sleep(seconds: float, message: str | None = None):
         padding = ' ' * 10
 
         if message:

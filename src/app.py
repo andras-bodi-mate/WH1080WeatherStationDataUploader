@@ -22,7 +22,9 @@ class App:
             logging.debug(reading)
 
         self.databaseManager.save(reading)
-        self.readingUploader.upload(reading)
+        rainInLastHour, rainInLast24Hours = self.databaseManager.getRainInLastHour(), self.databaseManager.getRainInLast24Hours()
+        print(rainInLastHour, rainInLast24Hours)
+        self.readingUploader.upload(reading, rainInLastHour, rainInLast24Hours)
 
     def start(self):
         try:
@@ -33,7 +35,10 @@ class App:
                             self.collectDataAndSend(device)
                             Core.sleep(self.uploadFrequency, "Getting next reading in: {0} seconds...")
                 except Exception as error:
-                    logging.error(error)
-                    Core.sleep(self.deviceConnectionRetryDelay, "Retrying in: {0} seconds...")
+                    if self.args.failEarly:
+                        raise error
+                    else:
+                        logging.error(error)
+                        Core.sleep(self.deviceConnectionRetryDelay, "Retrying in: {0} seconds...")
         except KeyboardInterrupt:
             logging.info("Exiting...")

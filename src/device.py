@@ -26,7 +26,7 @@ class Device:
     """Device altitude in meters above sea level"""
 
     @staticmethod
-    def getDewPoint(temperature: float, humidity: float):
+    def getDewPoint(temperature: float, humidity: float) -> float:
         """
         Using the supplied temperature and humidity to calculate the dew point
         """
@@ -35,7 +35,7 @@ class Device:
         return (237.7 * gamma) / (17.271 - gamma)
 
     @staticmethod
-    def getWindChill(temperature: float, wind: float):
+    def getWindChill(temperature: float, wind: float) -> float:
         """
         Using the supplied temperature and wind speed to calculate the wind chill
         factor.
@@ -60,7 +60,7 @@ class Device:
             return temperature
 
     @staticmethod 
-    def getSeaLevelAirPressure(airPressure, temperature):
+    def getSeaLevelAirPressure(airPressure, temperature) -> float:
         """Calculate sea level pressure from relative pressure in kPa and temperature in celsius using
 
         P₀ = P * exp((M * g * h) / (R * T))
@@ -99,7 +99,7 @@ class Device:
     def __exit__(self, exc_type, exc_value, traceback):
         self.device.close()
 
-    def readBlock(self, offset: int):
+    def readBlock(self, offset: int) -> bytearray:
         """
         Read a block of data from the device, starting at the given offset in bytes
         """
@@ -134,7 +134,7 @@ class Device:
 
         return block
 
-    def getReading(self):
+    def getReading(self) -> WeatherReading:
         fixedBlock = self.readBlock(0)
 
         # Check that we have good data
@@ -202,7 +202,7 @@ class Device:
         date = datetime.datetime.now()
 
         reading = WeatherReading(
-            timestamp=date,
+            measuredAt=date,
             indoorTemperature=indoorTemperature,
             indoorHumidity=indoorHumidity,
             outdoorTemperature=outdoorTemperature,

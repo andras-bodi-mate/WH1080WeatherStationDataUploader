@@ -21,6 +21,7 @@ def main():
     runParser = subparser.add_parser("run", help = "Run the program")
     runParser.add_argument("-u", "--username", help = "The username of the időkép account")
     runParser.add_argument("-p", "--password", help = "The password for the időkép account")
+    runParser.add_argument("-f", "--fail-early", dest = "failEarly", action = "store_true", help = "Do not catch runtime exceptions")
 
     verbosityGroup = parser.add_mutually_exclusive_group()
     verbosityGroup.add_argument("-q", "--quiet", action = "store_true", help = "Don't write anything to stdout")
