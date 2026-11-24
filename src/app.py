@@ -1,11 +1,14 @@
 import argparse
 import logging
+import sys
 
-from device import Device
-from readingUploader import ReadingUploader
-from databaseManager import DatabaseManager
 from config import Config
 from core import Core
+from databaseManager import DatabaseManager
+from device import Device
+from readingUploader import ReadingUploader
+
+logger = logging.getLogger(__name__)
 
 class App:
     def __init__(self, args: argparse.Namespace, config: Config, username: str, password: str):
@@ -19,7 +22,7 @@ class App:
     def collectDataAndSend(self, device: Device):
         reading = device.getReading()
         if self.args.verbose:
-            logging.debug(reading)
+            logger.debug(reading)
 
         self.databaseManager.save(reading)
         rainInLastHour, rainInLast24Hours = self.databaseManager.getRainInLastHour(), self.databaseManager.getRainInLast24Hours()
@@ -36,9 +39,11 @@ class App:
                             Core.sleep(self.uploadFrequency, "Getting next reading in: {0} seconds...")
                 except Exception as error:
                     if self.args.failEarly:
-                        raise error
+                        raise
                     else:
-                        logging.error(error)
+                        logger.error(error)
                         Core.sleep(self.deviceConnectionRetryDelay, "Retrying in: {0} seconds...")
         except KeyboardInterrupt:
-            logging.info("Exiting...")
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+            sys.exit(130)

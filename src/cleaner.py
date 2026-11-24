@@ -1,7 +1,9 @@
 import logging
 
-from loggingConfigurer import LoggingConfigurer
 from core import Core
+from loggingConfigurer import LoggingConfigurer
+
+logger = logging.getLogger(__name__)
 
 class Cleaner:
     @staticmethod
@@ -22,13 +24,13 @@ class Cleaner:
                     didDeleteAnyLogFile = True
 
             if didDeleteAnyWeatherData:
-                logging.info("Successfully cleaned weather data.")
+                logger.info("Successfully cleaned weather data.")
             else:
-                logging.info("No weather data was found that could be deleted.")
+                logger.info("No weather data was found that could be deleted.")
 
             if didDeleteAnyLogFile:
-                logging.info("Successfully cleaned logs.")
+                logger.info("Successfully cleaned logs.")
             else:
-                logging.info("No log was found that could be deleted.")
+                logger.info("No log was found that could be deleted.")
         else:
             print("Aborted.")

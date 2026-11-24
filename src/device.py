@@ -1,23 +1,25 @@
-import os
-import struct
-import math
 import datetime
 import logging
+import math
+import os
 import platform
+import struct
 
-from core import Core
-from weatherReading import WeatherReading
-from exceptions import DeviceConnectionError
 from config import Config
+from core import Core
+from exceptions import DeviceConnectionError
+from weatherReading import WeatherReading
 
 if platform.system() == "Windows":
-    with os.add_dll_directory(Core.getPath("lib")) as _:
+    with os.add_dll_directory(Core.getPath("lib")) as _:  # ty: ignore[missing-attribute]
         import hid
 else:
     import hid
 
+logger: logging.Logger = logging.getLogger(__name__)
+
 class Device:
-    windDirections = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    windDirections = ("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW")
 
     maxRainJump = 10
     """Maximum difference between two consecutive total rain readings in millimeters"""
@@ -88,12 +90,12 @@ class Device:
     def __enter__(self):
         try:
             self.device = hid.Device(self.vendorId, self.productId)
-            logging.info("Successfully connected to device.")
+            logger.info("Successfully connected to device.")
         except hid.HIDException as error:
             if error.args[0] == "unable to open device":
                 raise DeviceConnectionError("Couldn't connect to device.")
             else:
-                raise error
+                raise
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -126,11 +128,11 @@ class Device:
         while len(block) < 32:
             chunk = self.device.read(8, self.timeout * 1000)
             if not chunk:
-                raise IOError("Timed out while reading from weather station")
+                raise OSError("Timed out while reading from weather station")
             block.extend(chunk)
 
         if len(block) > 32:
-            raise IOError("Device returned too much data")
+            raise OSError("Device returned too much data")
 
         return block
 
@@ -217,20 +219,20 @@ class Device:
             rainSinceLastUpdate=rainSinceLastUpdate
         )
 
-        logging.debug(" ".join([
-            format(str(date)),
-            format("indoor humidity: %i," %indoorHumidity),
-            format("outdoor humidity: %i," %outdoorHumidity),
-            format("indoor temperature: %2.1f," %indoorTemperature),
-            format("outdoor temperature: %2.1f," %outdoorTemperature),
-            format("outdoor dew point: %2.2f," %outdoorDewPoint),
-            format("wind chill temp: %2.1f," %windChill),
-            format("wind speed: %2.1f," %windSpeed),
-            format("gust speed: %2.1f," %gustSpeed),
-            format("wind direction: %s," %Device.windDirections[windDirection]),
-            format("rain since last update: %2.1f," %rainSinceLastUpdate),
-            format("total rain since weather station reset: %3.1f," %allTimeRain),
-            format("air pressure at sea level: %4.1f," %seaLevelAirPressure)
+        logger.debug(" ".join([
+            str(date),
+            f"indoor humidity: {indoorHumidity},",
+            f"outdoor humidity: {outdoorHumidity},",
+            f"indoor temperature: {indoorTemperature:2.1f},",
+            f"outdoor temperature: {outdoorTemperature:2.1f},",
+            f"outdoor dew point: {outdoorDewPoint:2.2f},",
+            f"wind chill temp: {windChill:2.1f},",
+            f"wind speed: {windSpeed:2.1f},",
+            f"gust speed: {gustSpeed:2.1f},",
+            f"wind direction: {Device.windDirections[windDirection]},",
+            f"rain since last update: {rainSinceLastUpdate:2.1f},",
+            f"total rain since weather station reset: {allTimeRain:3.1f},",
+            f"air pressure at sea level: {seaLevelAirPressure:4.1f}",
         ]))
 
         return reading

@@ -1,9 +1,12 @@
-import requests
-from http.client import responses
 import logging
+from http.client import OK, responses
 
-from weatherReading import WeatherReading
+import requests
+
 from config import Config
+from weatherReading import WeatherReading
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 class ReadingUploader:
     def __init__(self, config: Config, username: str, password: str):
@@ -13,7 +16,7 @@ class ReadingUploader:
         self.password = password
 
     def upload(self, reading: WeatherReading, rainInLastHour: float, rainInLast24Hours: float):
-        logging.info("Sending reading...")
+        logger.info("Sending reading...")
 
         response = requests.get(
             "https://idokep.hu/sendws.php",
@@ -37,8 +40,8 @@ class ReadingUploader:
             }
         )
 
-        if response.status_code != requests.status_codes.codes.OK:
-            logging.error(f"Couldn't send reading. Reason: \
+        if response.status_code != OK:
+            logger.error(f"Couldn't send reading. Reason: \
                           \"{response.reason}\"  {response.status_code} {responses[response.status_code].upper()}")
         else:
-            logging.info("Successfully sent reading.")
+            logger.info("Successfully sent reading.")

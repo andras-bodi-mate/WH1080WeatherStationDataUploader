@@ -1,21 +1,25 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+
 import sty
 
-from core import Core
 from config import Config
 
+logger: logging.Logger = logging.getLogger(__name__)
+
 class ColoredFormatter(logging.Formatter):
-    levelColors = {
+    levelColors = frozendict({
         logging.DEBUG: sty.fg.grey,
         logging.INFO: sty.fg.green,
         logging.WARNING: sty.fg.yellow,
         logging.ERROR: sty.fg.red + sty.ef.bold,
         logging.CRITICAL: sty.fg.magenta + sty.ef.bold,
-    }
+    })
 
-    def __init__(self, fmt = None, datefmt = None, style = "%", validate = True, *, defaults = None):
+    def __init__(
+        self, fmt=None, datefmt=None, style="%", validate=True, *, defaults=None
+    ):
         super().__init__(fmt, datefmt, style, validate, defaults=defaults)
 
     def format(self, record):
@@ -60,30 +64,29 @@ class LoggingConfigurer:
         elif verbose:
             level = logging.DEBUG
 
+        loggingFormat = "%(asctime)s %(filename)s:%(lineno)d %(levelname)s: %(message)s"
+        dateFormat = "%H:%M:%S"
+
         console = logging.StreamHandler()
         console.setFormatter(
             ColoredFormatter(
-                "[%(filename)s] (%(asctime)s) %(levelname)s: %(message)s",
-                datefmt="%H:%M:%S"
+                loggingFormat,
+                datefmt=dateFormat,
             )
         )
 
         fileHandler = TimedRotatingFileHandler(
-            self.logDir / "app.log",
-            encoding="UTF-8",
-            when="midnight",
-            backupCount=5
+            self.logDir / "app.log", encoding="UTF-8", when="midnight", backupCount=5
         )
         fileHandler.suffix = "%Y.%m.%d"
         fileHandler.namer = self.logFileNamer
         fileHandler.setFormatter(
             logging.Formatter(
-                "[%(filename)s] (%(asctime)s) %(levelname)s: %(message)s",
-                datefmt="%H:%M:%S"
+                loggingFormat,
+                datefmt=dateFormat,
             )
         )
 
         logging.basicConfig(level=level, handlers=[console, fileHandler])
 
-        logging.debug(f"Logs will be saved in {self.logDir}")
-    
+        logger.debug(f"Logs will be saved in {self.logDir}")

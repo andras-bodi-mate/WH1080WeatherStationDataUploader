@@ -1,7 +1,10 @@
+from datetime import datetime, timedelta
 from pathlib import Path
-from sqlmodel import SQLModel, Session, create_engine, select
+
+from sqlmodel import Session, SQLModel, create_engine, select
+
 from weatherReading import WeatherReading
-from datetime import timedelta, datetime
+
 
 class DatabaseManager:
     def __init__(self, databasePath: Path):
@@ -20,7 +23,7 @@ class DatabaseManager:
         with self.getSession() as session:
             statement = select(WeatherReading).where(WeatherReading.measuredAt >= cutoffDatetime)
             reports = session.exec(statement).all()
-            hourlyRainSum = sum((report.rainSinceLastUpdate for report in reports))
+            hourlyRainSum = sum(report.rainSinceLastUpdate for report in reports)
 
         return hourlyRainSum
     

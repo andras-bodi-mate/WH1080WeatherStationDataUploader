@@ -1,6 +1,7 @@
-from pathlib import Path, PurePosixPath
-import time
 import math
+import time
+from pathlib import Path, PurePosixPath
+
 
 class Core:
     projectDir = Path(__file__).resolve().parent.parent

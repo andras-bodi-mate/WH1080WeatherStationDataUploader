@@ -1,14 +1,16 @@
 import argparse
-import tomllib
 import logging
+import tomllib
 
-import pwinput
+from pwinput import pwinput
 
-from cleaner import Cleaner
-from loggingConfigurer import LoggingConfigurer
 from app import App
+from cleaner import Cleaner
 from config import Config
 from core import Core
+from loggingConfigurer import LoggingConfigurer
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -16,7 +18,7 @@ def main():
         epilog = "Use 'main.py <command> --help' for more information on a command."
     )
     subparser = parser.add_subparsers(dest = "command", required = True)
-    cleanParser = subparser.add_parser("clean", help = "Delete all collected wheather data and logs")
+    subparser.add_parser("clean", help = "Delete all collected wheather data and logs")
 
     runParser = subparser.add_parser("run", help = "Run the program")
     runParser.add_argument("-u", "--username", help = "The username of the időkép account")
@@ -48,7 +50,7 @@ def main():
         verbose=args.verbose
     )
 
-    logging.debug(f"The program will use the following config options:\n{config}")
+    logger.debug(f"The program will use the following config options:\n{config}")
 
     if args.command == "clean":
         cleaner = Cleaner()
@@ -56,7 +58,7 @@ def main():
 
     elif args.command == "run":
         username = args.username or input("időkép username: ")
-        password = args.password or pwinput.pwinput("időkép password: ")
+        password = args.password or pwinput("időkép password: ")
 
         app = App(args, config, username, password)
         app.start()
