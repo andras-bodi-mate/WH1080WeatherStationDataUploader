@@ -16,7 +16,7 @@ class App:
         self.config = config
         self.uploadFrequency = config.uploadFrequency
         self.deviceConnectionRetryDelay = config.deviceConnectionRetryDelay
-        self.databaseManager = DatabaseManager(config.outputDir / "database.db")
+        self.databaseManager = DatabaseManager(config.databaseFilePath)
         self.readingUploader = ReadingUploader(config, username, password)
 
     def collectDataAndSend(self, device: Device):

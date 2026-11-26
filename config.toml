@@ -11,7 +11,7 @@ local_port = 57320
 
 [paths]
 log_dir = "log"
-output_dir = "out"
+database_file = "out/database.db"
 
 [logging]
 backup_count = 5

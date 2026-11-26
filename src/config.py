@@ -10,5 +10,5 @@ class Config:
     uploadFrequency: int
     uploadLocalPort: int
     logDir: Path
-    outputDir: Path
+    databaseFilePath: Path
     logBackupCount: int

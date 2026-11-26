@@ -5,7 +5,7 @@ description = "Retrieves weather data from the WH1080 Weather Station's indoor u
 readme = "README.md"
 requires-python = ">= 3.15"
 dependencies = [
-    "hid>=1.0.8",
+    "hid>=1.0.9",
     "pwinput>=1.0.3",
     "requests>=2.32.5",
     "sqlmodel>=0.0.38",

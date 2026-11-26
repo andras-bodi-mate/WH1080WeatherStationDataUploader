@@ -65,11 +65,11 @@ class Device:
     def getSeaLevelAirPressure(airPressure, temperature) -> float:
         """Calculate sea level pressure from relative pressure in kPa and temperature in celsius using
 
-        P₀ = P * exp((M * g * h) / (R * T))
+        P0 = P * exp((M * g * h) / (R * T))
 
         where:
             - P: Reference atmospheric pressure at altitude h
-            - P₀: Atmospheric pressure at sea level.
+            - P0: Atmospheric pressure at sea level.
             - M: Molar mass of dry air (0.0289644 kg/mol).
             - g: Acceleration due to gravity (9.80665 m/s²).
             - h: Altitude (height above sea level) in meters.
@@ -80,11 +80,10 @@ class Device:
         """
         return airPressure * math.exp((0.0289644 * 9.8069 * Device.altitude) / (8.31446261815324 * (temperature + 273.15)))
 
-    def __init__(self, config: Config, vendorId = 0x1941, productId = 0x8021):
+    def __init__(self, config: Config, vendorId: int = 0x1941, productId: int = 0x8021):
         self.vendorId = vendorId
         self.productId = productId
         self.timeout = config.deviceTimeout
-        self.previousReading = None
         self.previousRain = 0
 
     def __enter__(self):
@@ -106,19 +105,19 @@ class Device:
         Read a block of data from the device, starting at the given offset in bytes
         """
 
-        leastSignificantBit = offset & 0xFF
-        mostSignificantBit = offset >> 8 & 0xFF
+        leastSignificantByte = offset & 0xFF
+        mostSignificantByte = offset >> 8 & 0xFF
 
         # Construct a binary message
         request = struct.pack(
             "BBBBBBBB",
             0xA1,
-            mostSignificantBit,
-            leastSignificantBit,
+            mostSignificantByte,
+            leastSignificantByte,
             32,
             0xA1,
-            mostSignificantBit,
-            leastSignificantBit,
+            mostSignificantByte,
+            leastSignificantByte,
             32
         )
 
@@ -219,7 +218,9 @@ class Device:
             rainSinceLastUpdate=rainSinceLastUpdate
         )
 
-        logger.debug(" ".join([
+        logger.debug(
+            "Recieved reading:\n"
+            " ".join([
             str(date),
             f"indoor humidity: {indoorHumidity},",
             f"outdoor humidity: {outdoorHumidity},",

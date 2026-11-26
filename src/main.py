@@ -5,7 +5,6 @@ import tomllib
 from pwinput import pwinput
 
 from app import App
-from cleaner import Cleaner
 from config import Config
 from core import Core
 from loggingConfigurer import LoggingConfigurer
@@ -17,13 +16,10 @@ def main():
         description = "Collects data from a WH1080 weather station connected via USB, and forwards the weather data to időkép.hu",
         epilog = "Use 'main.py <command> --help' for more information on a command."
     )
-    subparser = parser.add_subparsers(dest = "command", required = True)
-    subparser.add_parser("clean", help = "Delete all collected wheather data and logs")
-
-    runParser = subparser.add_parser("run", help = "Run the program")
-    runParser.add_argument("-u", "--username", help = "The username of the időkép account")
-    runParser.add_argument("-p", "--password", help = "The password for the időkép account")
-    runParser.add_argument("-f", "--fail-early", dest = "failEarly", action = "store_true", help = "Do not catch runtime exceptions")
+    
+    parser.add_argument("-u", "--username", help = "The username of the időkép account")
+    parser.add_argument("-p", "--password", help = "The password for the időkép account")
+    parser.add_argument("-f", "--fail-early", dest = "failEarly", action = "store_true", help = "Do not catch runtime exceptions")
 
     verbosityGroup = parser.add_mutually_exclusive_group()
     verbosityGroup.add_argument("-q", "--quiet", action = "store_true", help = "Don't write anything to stdout")
@@ -41,7 +37,7 @@ def main():
         uploadFrequency=configToml["upload"]["frequency"],
         uploadLocalPort=configToml["upload"]["local_port"],
         logDir=Core.getPath(configToml["paths"]["log_dir"]),
-        outputDir=Core.getPath(configToml["paths"]["output_dir"]),
+        databaseFilePath=Core.getPath(configToml["paths"]["database_file"]),
         logBackupCount=configToml["logging"]["backup_count"]
     )
 
@@ -52,15 +48,11 @@ def main():
 
     logger.debug(f"The program will use the following config options:\n{config}")
 
-    if args.command == "clean":
-        cleaner = Cleaner()
-        cleaner.clean()
+    username = args.username or input("időkép username: ")
+    password = args.password or pwinput("időkép password: ")
 
-    elif args.command == "run":
-        username = args.username or input("időkép username: ")
-        password = args.password or pwinput("időkép password: ")
+    app = App(args, config, username, password)
+    app.start()
 
-        app = App(args, config, username, password)
-        app.start()
-
-main()
+if __name__ == "__main__":
+    main()
