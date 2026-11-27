@@ -4,15 +4,19 @@ This project was made to retrieve weather data from the indoor unit of the WH108
 ## Dependencies
 This project uses uv as it's package manager, so you will have to install it following https://docs.astral.sh/uv/#installation. (uv will install the required python version along with the necessary packages.)
 
-NOTE: On Windows, you can skip the next step as hidapi.dll comes packaged with this repo.
-You will also have to download the HID (Human Interface Device) shared library following this guide: https://pypi.org/project/hid/
+You *might* also have to download the HID (Human Interface Device) library (if it's not installed on your system) following this guide: https://pypi.org/project/hid/, however on Windows, you can skip this step as hidapi.dll comes packaged with this repo.
 
 ## Running
-Start the program using uv: `uv run python src/main.py run`.
+Start the program using uv: `uv run python src/main.py`.
 
 The program then will ask for the username and password of the időkép account. After that, it will start uploading the weather data every minute.
+
+## Arguments
+You can pass the username and password as command line arguments with the -u/--username and -p/--password arguments.
+The program can also be started in quiet and verbose mode using the -q/--quiet and -v/--verbose flags.
+Take a look at the full argument list using `uv run python src/main.py --help`
 
 ## Deleting saved weather data
 NOTE: This will remove ALL weather data that was saved. This can't be undone.
 
-Start the program using the `clean` command like so: `uv run python src/main.py clean`
+Start the `src/clean.py` script like so: `uv run python src/clean.py`

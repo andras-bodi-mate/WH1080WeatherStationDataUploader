@@ -1,11 +1,8 @@
-import logging
 import tomllib
 from pathlib import Path
 
 from core import Core
 from loggingConfigurer import LoggingConfigurer
-
-logger = logging.getLogger(__name__)
 
 
 def clean():
@@ -28,14 +25,14 @@ def clean():
                 didDeleteAnyLogFile = True
 
         if weatherDatabaseExists:
-            logger.info("Successfully cleaned weather data.")
+            print("Successfully cleaned weather data.")
         else:
-            logger.info("No weather data was found that could be deleted.")
+            print("No weather data was found that could be deleted.")
 
         if didDeleteAnyLogFile:
-            logger.info("Successfully cleaned logs.")
+            print("Successfully cleaned logs.")
         else:
-            logger.info("No log was found that could be deleted.")
+            print("No log was found that could be deleted.")
     else:
         print("Aborted.")
 
