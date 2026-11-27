@@ -1,4 +1,3 @@
-from ast import parse
 import argparse
 import logging
 import tomllib
@@ -12,20 +11,37 @@ from loggingConfigurer import LoggingConfigurer
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 def main():
     parser = argparse.ArgumentParser(
-        description = "Collects data from a WH1080 weather station connected via USB, and forwards the weather data to időkép.hu",
-        epilog = "Use 'main.py <command> --help' for more information on a command."
+        description="Collects data from a WH1080 weather station connected via USB, and forwards the weather data to időkép.hu",
+        epilog="Use 'main.py <command> --help' for more information on a command.",
     )
-    
-    parser.add_argument("-u", "--username", help = "The username of the időkép account")
-    parser.add_argument("-p", "--password", help = "The password for the időkép account")
-    parser.add_argument("-f", "--fail-early", dest = "failEarly", action = "store_true", help = "Do not catch runtime exceptions")
-    parser.add_argument("-n", "--no-upload", dest = "noUpload", action = "store_true", help = "Do not upload weather data")
+
+    parser.add_argument("-u", "--username", help="The username of the időkép account")
+    parser.add_argument("-p", "--password", help="The password for the időkép account")
+    parser.add_argument(
+        "-f",
+        "--fail-early",
+        dest="failEarly",
+        action="store_true",
+        help="Do not catch runtime exceptions",
+    )
+    parser.add_argument(
+        "-n",
+        "--no-upload",
+        dest="noUpload",
+        action="store_true",
+        help="Do not upload weather data",
+    )
 
     verbosityGroup = parser.add_mutually_exclusive_group()
-    verbosityGroup.add_argument("-q", "--quiet", action = "store_true", help = "Don't write anything to stdout")
-    verbosityGroup.add_argument("-v", "--verbose", action = "store_true", help = "Print debug information")
+    verbosityGroup.add_argument(
+        "-q", "--quiet", action="store_true", help="Don't write anything to stdout"
+    )
+    verbosityGroup.add_argument(
+        "-v", "--verbose", action="store_true", help="Print debug information"
+    )
 
     args = parser.parse_args()
 
@@ -40,21 +56,23 @@ def main():
         uploadLocalPort=configToml["upload"]["local_port"],
         logDir=Core.getPath(configToml["paths"]["log_dir"]),
         databaseFilePath=Core.getPath(configToml["paths"]["database_file"]),
-        logBackupCount=configToml["logging"]["backup_count"]
+        logBackupCount=configToml["logging"]["backup_count"],
     )
 
-    LoggingConfigurer(config).configureLogging(
-        quiet=args.quiet,
-        verbose=args.verbose
-    )
+    LoggingConfigurer(config).configureLogging(quiet=args.quiet, verbose=args.verbose)
 
     logger.debug(f"The program will use the following config options:\n{config}")
 
-    username = args.username or input("időkép username: ")
-    password = args.password or pwinput("időkép password: ")
+    if not args.noUpload:
+        username: str = args.username or input("időkép username: ")
+        password: str = args.password or pwinput("időkép password: ")
+    else:
+        username = None
+        password = None
 
     app = App(args, config, username, password)
     app.start()
+
 
 if __name__ == "__main__":
     main()

@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlmodel import Field, SQLModel
 
 
-class WeatherReading(SQLModel, table = True):
-    id: int = Field(default = None, primary_key = True)
+class WeatherReading(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
     """Auto-generated unique identifier"""
 
     measuredAt: datetime
@@ -27,7 +27,7 @@ class WeatherReading(SQLModel, table = True):
 
     gustSpeed: float
     """The gust speed in kilometers per hour (wind speed averaged over a 20 second period)."""
-    
+
     windDirection: float
     """The wind direction in degrees (0 is north and 90 is east)."""
 

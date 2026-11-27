@@ -8,14 +8,17 @@ from config import Config
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 class ColoredFormatter(logging.Formatter):
-    levelColors = frozendict({
-        logging.DEBUG: sty.fg.grey,
-        logging.INFO: sty.fg.green,
-        logging.WARNING: sty.fg.yellow,
-        logging.ERROR: sty.fg.red + sty.ef.bold,
-        logging.CRITICAL: sty.fg.magenta + sty.ef.bold,
-    })
+    levelColors = frozendict(
+        {
+            logging.DEBUG: sty.fg.grey,
+            logging.INFO: sty.fg.green,
+            logging.WARNING: sty.fg.yellow,
+            logging.ERROR: sty.fg.red + sty.ef.bold,
+            logging.CRITICAL: sty.fg.magenta + sty.ef.bold,
+        }
+    )
 
     def __init__(
         self, fmt=None, datefmt=None, style="%", validate=True, *, defaults=None

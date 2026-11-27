@@ -7,6 +7,7 @@ from loggingConfigurer import LoggingConfigurer
 
 logger = logging.getLogger(__name__)
 
+
 def clean():
     with open(Core.getPath("config.toml"), "rb") as configFile:
         configToml = tomllib.load(configFile)
@@ -14,7 +15,7 @@ def clean():
     databasePath = Path(configToml["paths"]["database_file"])
 
     response = input("Are you sure you want to erase ALL weather data and logs? [y/N] ")
-    if response.upper() == 'Y':
+    if response.upper() == "Y":
         weatherDatabaseExists = databasePath.exists()
         if weatherDatabaseExists:
             databasePath.unlink()
@@ -38,8 +39,10 @@ def clean():
     else:
         print("Aborted.")
 
+
 def main():
     clean()
+
 
 if __name__ == "__main__":
     main()

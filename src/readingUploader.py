@@ -8,6 +8,7 @@ from weatherReading import WeatherReading
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 class ReadingUploader:
     def __init__(self, config: Config, username: str, password: str):
         self.frequency = config.uploadFrequency
@@ -15,12 +16,14 @@ class ReadingUploader:
         self.username = username
         self.password = password
 
-    def upload(self, reading: WeatherReading, rainInLastHour: float, rainInLast24Hours: float):
+    def upload(
+        self, reading: WeatherReading, rainInLastHour: float, rainInLast24Hours: float
+    ):
         logger.info("Sending reading...")
 
         response = requests.get(
             "https://idokep.hu/sendws.php",
-            params = {
+            params={
                 "user": self.username,
                 "pass": self.password,
                 "ev": reading.measuredAt.year,
@@ -36,12 +39,14 @@ class ReadingUploader:
                 "szelero": reading.windSpeed,
                 "szellokes": reading.gustSpeed,
                 "csap": rainInLast24Hours,
-                "csap1h": rainInLastHour
-            }
+                "csap1h": rainInLastHour,
+            },
         )
 
         if response.status_code != OK:
-            logger.error(f"Couldn't send reading. Reason: \
-                          \"{response.reason}\"  {response.status_code} {responses[response.status_code].upper()}")
+            logger.error(
+                f'Couldn\'t send reading. Reason: \
+                          "{response.reason}"  {response.status_code} {responses[response.status_code].upper()}'
+            )
         else:
             logger.info("Successfully sent reading.")

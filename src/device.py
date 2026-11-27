@@ -21,8 +21,26 @@ for info in hid.enumerate(0x1941, 0x8021):
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 class Device:
-    windDirections = ("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW")
+    windDirections = (
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+    )
 
     maxRainJump = 10
     """Maximum difference between two consecutive total rain readings in millimeters"""
@@ -51,12 +69,14 @@ class Device:
         windKph = 3.6 * wind
 
         # Low wind speed, or high temperature, negates any perceived wind chill
-        if ((windKph <= 4.8) or (temperature > 10.0)):
+        if (windKph <= 4.8) or (temperature > 10.0):
             return temperature
 
-        windChill = (13.12 + (0.6215 * temperature) - 
-            (11.37 * (windKph ** 0.16)) + 
-            (0.3965 * temperature * (windKph ** 0.16))
+        windChill = (
+            13.12
+            + (0.6215 * temperature)
+            - (11.37 * (windKph**0.16))
+            + (0.3965 * temperature * (windKph**0.16))
         )
 
         # Return the lower of temperature or wind chill temperature
@@ -65,7 +85,7 @@ class Device:
         else:
             return temperature
 
-    @staticmethod 
+    @staticmethod
     def getSeaLevelAirPressure(airPressure, temperature) -> float:
         """Calculate sea level pressure from relative pressure in kPa and temperature in celsius using
 
@@ -82,7 +102,10 @@ class Device:
 
         Air pressure is in kPa.
         """
-        return airPressure * math.exp((0.0289644 * 9.8069 * Device.altitude) / (8.31446261815324 * (temperature + 273.15)))
+        return airPressure * math.exp(
+            (0.0289644 * 9.8069 * Device.altitude)
+            / (8.31446261815324 * (temperature + 273.15))
+        )
 
     def __init__(self, config: Config, vendorId: int = 0x1941, productId: int = 0x8021):
         self.vendorId = vendorId
@@ -110,15 +133,7 @@ class Device:
         """
 
         # Construct a binary message
-        request = struct.pack(
-            ">BHBBHB",
-            0xA1,
-            offset,
-            0x20,
-            0xA1,
-            offset,
-            0x20
-        )
+        request = struct.pack(">BHBBHB", 0xA1, offset, 0x20, 0xA1, offset, 0x20)
 
         self.device.write(bytes([0x00]) + request)
 
@@ -141,7 +156,7 @@ class Device:
         fixedBlock = self.readBlock(0)
 
         # Check that we have good data
-        if (fixedBlock[0] != 0x55):
+        if fixedBlock[0] != 0x55:
             raise ValueError("Bad data returned")
 
         # Bytes 31 and 32 when combined create an unsigned short int
@@ -156,7 +171,9 @@ class Device:
         totalRainOverflowed = bool(currentBlock[15] & 0x80)
 
         if noSensorContact:
-            raise NoSensorConnectionError("The indoor unit couldn't recieve signal from the outdoor sensor")
+            raise NoSensorConnectionError(
+                "The indoor unit couldn't recieve signal from the outdoor sensor"
+            )
 
         # Indoor information
         indoorHumidity = currentBlock[1]
@@ -169,10 +186,12 @@ class Device:
 
         # Absolute air pressure is encoded in an unsigned short int starting at byte 7
         # that we multiply by 0.1 to find the absolute pressure
-        absoluteAirPressure = struct.unpack("<H", currentBlock[7:9])[0]*0.1
+        absoluteAirPressure = struct.unpack("<H", currentBlock[7:9])[0] * 0.1
         print(absoluteAirPressure)
-        seaLevelAirPressure = Device.getSeaLevelAirPressure(absoluteAirPressure, outdoorTemperature)
-        
+        seaLevelAirPressure = Device.getSeaLevelAirPressure(
+            absoluteAirPressure, outdoorTemperature
+        )
+
         # Bytes 9 and 10 store the low bits of the wind and gust speed
         # and byte 11 stores the high bits
         wind = currentBlock[9]
@@ -180,7 +199,7 @@ class Device:
         windExtra = currentBlock[11]
         windDirection = currentBlock[12]
         windDirectionDegrees = windDirection * 22.5
-        
+
         # Bytes 14 and 15  when combined create an unsigned short int
         # that we multiply by 0.3 to find the total rain
         allTimeRain = struct.unpack("<H", currentBlock[13:15])[0] * 0.3
@@ -196,7 +215,9 @@ class Device:
         if self.previousRain == 0 or totalRainOverflowed:
             self.previousRain = allTimeRain
 
-        rainSinceLastUpdate = allTimeRain - self.previousRain # Calculate the amount of rain that has fallen since last update
+        rainSinceLastUpdate = (
+            allTimeRain - self.previousRain
+        )  # Calculate the amount of rain that has fallen since last update
         if rainSinceLastUpdate > Device.maxRainJump:  # Filter rainfall spikes
             rainSinceLastUpdate = 0
             allTimeRain = self.previousRain
@@ -218,26 +239,30 @@ class Device:
             windChill=windChill,
             seaLevelAirPressure=seaLevelAirPressure,
             allTimeRain=allTimeRain,
-            rainSinceLastUpdate=rainSinceLastUpdate
+            rainSinceLastUpdate=rainSinceLastUpdate,
         )
 
         logger.debug(
-            "Recieved reading:\n" + (
-                " ".join([
-                str(date),
-                f"indoor humidity: {indoorHumidity},",
-                f"outdoor humidity: {outdoorHumidity},",
-                f"indoor temperature: {indoorTemperature:2.1f},",
-                f"outdoor temperature: {outdoorTemperature:2.1f},",
-                f"outdoor dew point: {outdoorDewPoint:2.2f},",
-                f"wind chill temp: {windChill:2.1f},",
-                f"wind speed: {windSpeed:2.1f},",
-                f"gust speed: {gustSpeed:2.1f},",
-                f"wind direction: {Device.windDirections[windDirection]},",
-                f"rain since last update: {rainSinceLastUpdate:2.1f},",
-                f"total rain since weather station reset: {allTimeRain:3.1f},",
-                f"air pressure at sea level: {seaLevelAirPressure:4.1f}"
-            ])
-        ))
+            "Recieved reading:\n"
+            + (
+                " ".join(
+                    [
+                        str(date),
+                        f"indoor humidity: {indoorHumidity},",
+                        f"outdoor humidity: {outdoorHumidity},",
+                        f"indoor temperature: {indoorTemperature:2.1f},",
+                        f"outdoor temperature: {outdoorTemperature:2.1f},",
+                        f"outdoor dew point: {outdoorDewPoint:2.2f},",
+                        f"wind chill temp: {windChill:2.1f},",
+                        f"wind speed: {windSpeed:2.1f},",
+                        f"gust speed: {gustSpeed:2.1f},",
+                        f"wind direction: {Device.windDirections[windDirection]},",
+                        f"rain since last update: {rainSinceLastUpdate:2.1f},",
+                        f"total rain since weather station reset: {allTimeRain:3.1f},",
+                        f"air pressure at sea level: {seaLevelAirPressure:4.1f}",
+                    ]
+                )
+            )
+        )
 
         return reading
