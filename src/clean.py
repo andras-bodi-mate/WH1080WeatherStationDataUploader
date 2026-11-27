@@ -33,8 +33,6 @@ def clean():
             print("Successfully cleaned logs.")
         else:
             print("No log was found that could be deleted.")
-    else:
-        print("Aborted.")
 
 
 def main():

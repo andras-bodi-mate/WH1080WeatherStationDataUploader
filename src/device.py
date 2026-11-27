@@ -7,7 +7,7 @@ import struct
 
 from config import Config
 from core import Core
-from exceptions import DeviceConnectionError, NoSensorConnectionError
+from exceptions import NoSensorConnectionError
 from weatherReading import WeatherReading
 
 if platform.system() == "Windows":
@@ -16,8 +16,6 @@ if platform.system() == "Windows":
 else:
     import hid
 
-for info in hid.enumerate(0x1941, 0x8021):
-    print(info)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -114,14 +112,9 @@ class Device:
         self.previousRain = 0
 
     def __enter__(self):
-        try:
-            self.device = hid.Device(self.vendorId, self.productId)
-            logger.info("Successfully connected to device.")
-        except hid.HIDException as error:
-            if error.args[0] == "unable to open device":
-                raise DeviceConnectionError("Couldn't connect to device.")
-            else:
-                raise
+        self.device = hid.Device(self.vendorId, self.productId)
+        logger.info("Successfully connected to device.")
+
         return self
 
     def __exit__(self, _exc_type, _exc_value, _traceback):
@@ -187,7 +180,6 @@ class Device:
         # Absolute air pressure is encoded in an unsigned short int starting at byte 7
         # that we multiply by 0.1 to find the absolute pressure
         absoluteAirPressure = struct.unpack("<H", currentBlock[7:9])[0] * 0.1
-        print(absoluteAirPressure)
         seaLevelAirPressure = Device.getSeaLevelAirPressure(
             absoluteAirPressure, outdoorTemperature
         )
