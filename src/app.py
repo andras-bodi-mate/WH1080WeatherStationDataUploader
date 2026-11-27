@@ -30,9 +30,10 @@ class App:
             self.readingUploader = None
 
     def collectDataAndSend(self, device: Device):
-        reading = device.getReading()
-        if self.args.verbose:
-            logger.debug(reading)
+        lastReading = self.databaseManager.getLastReading()
+        logger.debug(f"Last reading all time rain: {lastReading.allTimeRain if lastReading else 'There was no last reading'}")
+
+        reading = device.getReading(lastReading.allTimeRain if lastReading else None)
 
         self.databaseManager.save(reading)
         rainInLastHour, rainInLast24Hours = (
@@ -44,28 +45,23 @@ class App:
             self.readingUploader.upload(reading, rainInLastHour, rainInLast24Hours)
 
     def start(self):
-        try:
-            while True:
-                try:
-                    with Device(self.config) as device:
-                        while True:
-                            self.collectDataAndSend(device)
-                            Core.sleep(
-                                self.uploadFrequency,
-                                None
-                                if self.args.quiet
-                                else "Getting next reading in: {0} seconds...",
-                            )
-                except Exception as error:
-                    if self.args.failEarly:
-                        raise
-                    else:
-                        logger.error(error)
+        while True:
+            try:
+                with Device(self.config) as device:
+                    while True:
+                        self.collectDataAndSend(device)
                         Core.sleep(
-                            self.deviceConnectionRetryDelay,
-                            None if self.args.quiet else "Retrying in: {0} seconds...",
+                            self.uploadFrequency,
+                            None
+                            if self.args.quiet
+                            else "Getting next reading in: {0} seconds...",
                         )
-        except KeyboardInterrupt:
-            sys.stdout.write("\n")
-            sys.stdout.flush()
-            sys.exit(130)
+            except Exception as error:
+                if self.args.failEarly:
+                    raise
+                else:
+                    logger.error(error)
+                    Core.sleep(
+                        self.deviceConnectionRetryDelay,
+                        None if self.args.quiet else "Retrying in: {0} seconds...",
+                    )

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine, select, col
 
 from weatherReading import WeatherReading
 
@@ -17,6 +17,15 @@ class DatabaseManager:
 
     def getSession(self) -> Session:
         return Session(self.databaseEngine, expire_on_commit=False)
+
+    def getLastReading(self) -> WeatherReading | None:
+        with self.getSession() as session:
+            statement = (
+                select(WeatherReading).order_by(col(WeatherReading.measuredAt).desc()).limit(1)
+            )
+            lastReading = session.exec(statement).first()
+
+        return lastReading
 
     def getRainDuringTimeDelta(self, timeDelta: timedelta) -> float:
         currentDatetime = datetime.now()

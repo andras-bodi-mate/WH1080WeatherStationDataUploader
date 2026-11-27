@@ -1,5 +1,7 @@
 import argparse
 import logging
+import signal
+import sys
 import tomllib
 
 from pwinput import pwinput
@@ -12,6 +14,11 @@ from loggingConfigurer import LoggingConfigurer
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+def signalHandler(signalNumber, _frame):
+    if signalNumber == signal.SIGINT:
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+        sys.exit(130)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -47,6 +54,8 @@ def main():
     namespace = ArgumentNamespace()
     args = parser.parse_args(namespace=namespace)
 
+    logger.debug(f"The program will use the following arguments: {args}")
+
     with open(Core.getPath("config.toml"), "rb") as configFile:
         configToml = tomllib.load(configFile)
 
@@ -71,6 +80,8 @@ def main():
     else:
         username = None
         password = None
+
+    signal.signal(signal.SIGINT, signalHandler)
 
     app = App(args, config, username, password)
     app.start()
