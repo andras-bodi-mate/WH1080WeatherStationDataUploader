@@ -1,5 +1,4 @@
 import logging
-import sys
 
 from argumentNamespace import ArgumentNamespace
 from config import Config
@@ -31,7 +30,9 @@ class App:
 
     def collectDataAndSend(self, device: Device):
         lastReading = self.databaseManager.getLastReading()
-        logger.debug(f"Last reading all time rain: {lastReading.allTimeRain if lastReading else 'There was no last reading'}")
+        logger.debug(
+            f"Last reading all time rain: {lastReading.allTimeRain if lastReading else 'There was no last reading'}"
+        )
 
         reading = device.getReading(lastReading.allTimeRain if lastReading else None)
 

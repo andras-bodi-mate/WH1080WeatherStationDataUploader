@@ -12,3 +12,9 @@ dependencies = [
     "strip-ansi>=0.1.1",
     "sty>=1.0.6",
 ]
+
+[tool.ruff.lint]
+extend-select = [
+    "UP",
+    "I"
+]

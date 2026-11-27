@@ -14,11 +14,13 @@ from loggingConfigurer import LoggingConfigurer
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 def signalHandler(signalNumber, _frame):
     if signalNumber == signal.SIGINT:
         sys.stdout.write("\n")
         sys.stdout.flush()
         sys.exit(130)
+
 
 def main():
     parser = argparse.ArgumentParser(

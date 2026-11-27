@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from sqlmodel import Session, SQLModel, create_engine, select, col
+from sqlmodel import Session, SQLModel, col, create_engine, select
 
 from weatherReading import WeatherReading
 
@@ -21,7 +21,9 @@ class DatabaseManager:
     def getLastReading(self) -> WeatherReading | None:
         with self.getSession() as session:
             statement = (
-                select(WeatherReading).order_by(col(WeatherReading.measuredAt).desc()).limit(1)
+                select(WeatherReading)
+                .order_by(col(WeatherReading.measuredAt).desc())
+                .limit(1)
             )
             lastReading = session.exec(statement).first()
 
