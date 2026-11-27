@@ -1,7 +1,7 @@
-import argparse
 import logging
 import sys
 
+from argumentNamespace import ArgumentNamespace
 from config import Config
 from core import Core
 from databaseManager import DatabaseManager
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class App:
     def __init__(
         self,
-        args: argparse.Namespace,
+        args: ArgumentNamespace,
         config: Config,
         username: str | None,
         password: str | None,

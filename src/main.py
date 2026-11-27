@@ -5,6 +5,7 @@ import tomllib
 from pwinput import pwinput
 
 from app import App
+from argumentNamespace import ArgumentNamespace
 from config import Config
 from core import Core
 from loggingConfigurer import LoggingConfigurer
@@ -43,7 +44,8 @@ def main():
         "-v", "--verbose", action="store_true", help="Print debug information"
     )
 
-    args = parser.parse_args()
+    namespace = ArgumentNamespace()
+    args = parser.parse_args(namespace=namespace)
 
     with open(Core.getPath("config.toml"), "rb") as configFile:
         configToml = tomllib.load(configFile)
