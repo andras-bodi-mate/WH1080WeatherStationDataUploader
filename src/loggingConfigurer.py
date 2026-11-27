@@ -22,7 +22,7 @@ class ColoredFormatter(logging.Formatter):
     ):
         super().__init__(fmt, datefmt, style, validate, defaults=defaults)
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord):
         color = self.levelColors.get(record.levelno, "")
         reset = sty.rs.all
 

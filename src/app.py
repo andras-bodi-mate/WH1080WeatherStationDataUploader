@@ -26,8 +26,9 @@ class App:
 
         self.databaseManager.save(reading)
         rainInLastHour, rainInLast24Hours = self.databaseManager.getRainInLastHour(), self.databaseManager.getRainInLast24Hours()
-        print(rainInLastHour, rainInLast24Hours)
-        self.readingUploader.upload(reading, rainInLastHour, rainInLast24Hours)
+        
+        if not self.args.noUpload:
+            self.readingUploader.upload(reading, rainInLastHour, rainInLast24Hours)
 
     def start(self):
         try:
