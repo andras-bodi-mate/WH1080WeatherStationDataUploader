@@ -66,7 +66,6 @@ def main():
         deviceTimeout=configToml["device"]["timeout"],
         deviceConnectionRetryDelay=configToml["device"]["connection_retry_delay"],
         uploadFrequency=configToml["upload"]["frequency"],
-        uploadLocalPort=configToml["upload"]["local_port"],
         logDir=Core.getPath(configToml["paths"]["log_dir"]),
         databaseFilePath=Core.getPath(configToml["paths"]["database_file"]),
         logBackupCount=configToml["logging"]["backup_count"],

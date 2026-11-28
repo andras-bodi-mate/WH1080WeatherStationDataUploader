@@ -8,7 +8,6 @@ class Config:
     deviceTimeout: int
     deviceConnectionRetryDelay: int
     uploadFrequency: int
-    uploadLocalPort: int
     logDir: Path
     databaseFilePath: Path
     logBackupCount: int

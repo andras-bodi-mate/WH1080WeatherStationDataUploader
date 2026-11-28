@@ -25,6 +25,21 @@ You can pass the username and password as command line arguments with the `-u`/`
 The program can also be started in quiet and verbose mode using the `-q`/`--quiet` and `-v`/`--verbose` flags.
 Take a look at the full argument list using `uv run python src/main.py --help`
 
+# Config
+The `config.toml` file in the project directory contains configuration options for the program that are usually only needed to be set up once.
+
+These are the options that can be configured:
+
+| Option | Description |
+|---|---|
+| station.altitude | Altitude of the sensor in meters above sea level |
+| device.timeout | Max number of seconds with no response before closing connection |
+| device.connection_retry_delay | How many seconds to wait before trying to connect again |
+| upload.frequency | How many seconds to wait before reading and uploading new report |
+| paths.log_dir | Path to directory where logs should be written |
+| paths.database_file | Path to file where database should be stored |
+| logging.backup_count | Number of backup log files to keep |
+
 ## Deleting saved weather data
 > NOTE: This will remove ALL weather data that was saved. This can't be undone.
 

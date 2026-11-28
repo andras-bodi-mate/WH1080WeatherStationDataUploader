@@ -12,7 +12,6 @@ logger: logging.Logger = logging.getLogger(__name__)
 class ReadingUploader:
     def __init__(self, config: Config, username: str, password: str):
         self.frequency = config.uploadFrequency
-        self.localPort = config.uploadLocalPort
         self.username = username
         self.password = password
 
